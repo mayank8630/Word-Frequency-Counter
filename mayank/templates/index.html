@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Word Frequency Counter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+        }
+        .container {
+            width: 80%;
+            margin: auto;
+            overflow: hidden;
+        }
+        header {
+            background: #333;
+            color: #fff;
+            padding-top: 30px;
+            min-height: 70px;
+            border-bottom: #77aaff 3px solid;
+        }
+        header h1 {
+            text-align: center;
+            text-transform: uppercase;
+            margin: 0;
+        }
+        .description {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .input-area {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .input-area textarea {
+            width: 80%;
+            height: 150px;
+            padding: 10px;
+            font-size: 16px;
+        }
+        .buttons {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .buttons button, .buttons input[type="file"] {
+            padding: 12px 24px;
+            margin: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            border: none;
+            border-radius: 30px;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .buttons button:hover, .buttons input[type="file"]:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .buttons button:active, .buttons input[type="file"]:active {
+            transform: translateY(1px);
+        }
+        #analyzeBtn {
+            background-color: #4CAF50;
+            color: white;
+        }
+        #resetBtn {
+            background-color: #f44336;
+            color: white;
+        }
+        #csvBtn {
+            background-color: #2196F3;
+            color: white;
+        }
+        #pdfBtn {
+            background-color: #FF9800;
+            color: white;
+        }
+        .buttons input[type="file"] {
+            background-color: #9C27B0;
+            color: white;
+            display: inline-block;
+        }
+        .buttons input[type="file"]::-webkit-file-upload-button {
+            visibility: hidden;
+        }
+        .buttons input[type="file"]::before {
+            content: 'Select File';
+            display: inline-block;
+            background: linear-gradient(top, #f9f9f9, #e3e3e3);
+            border: none;
+            padding: 0;
+            outline: none;
+            white-space: nowrap;
+            cursor: pointer;
+            font-weight: bold;
+        }
+        .results {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .results table {
+            width: 80%;
+            margin: auto;
+            border-collapse: collapse;
+        }
+        .results th, .results td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        .results th {
+            background-color: #f2f2f2;
+        }
+        .chart {
+            text-align: center;
+            margin: 20px 0;
+        }
+    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&family=Open+Sans:wght@300;400&family=Roboto:wght@300;400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.17/d3.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/d3-cloud/1.2.5/d3.layout.cloud.min.js"></script>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <h1>Word Frequency Counter</h1>
+            <div class="header-decoration"></div>
+        </div>
+    </header>
+    <div class="container">
+        <div class="description">
+            <h2>Word Frequency Counter</h2>
+            <div class="feature-box">
+                <p class="feature-text">This Word Frequency Counter analyzes text to determine the frequency of word usage. It helps in identifying common words and understanding text composition.</p>
+            </div>
+            <div class="benefits">
+                <div class="benefit-item">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>Analyze word frequency</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-search"></i>
+                    <span>Identify common words</span>
+                </div>
+                <div class="benefit-item">
+                    <i class="fas fa-book-open"></i>
+                    <span>Understand text composition</span>
+                </div>
+            </div>
+        </div>
+        <div class="input-area">
+            <textarea id="textInput" placeholder="Enter Text Here"></textarea>
+            <br>
+            <div class="file-input-wrapper">
+                <input type="file" id="fileInput" accept=".txt" onchange="loadFile(event)">
+                <label for="fileInput" class="file-input-label">
+                    <span class="file-input-text">Choose a file</span>
+                    <span class="file-input-button">Browse</span>
+                </label>
+            </div>
+        </div>
+        <div class="buttons">
+            <button id="analyzeBtn" onclick="analyzeText()">Analyze</button>
+            <button id="resetBtn" onclick="resetText()">Reset</button>
+            <button id="csvBtn" onclick="downloadCSV()">Download CSV</button>
+            <button id="pdfBtn" onclick="downloadPDF()">Download PDF</button>
+        </div>
+        <div class="results">
+            <h2>WORD FREQUENCY</h2>
+            <div id="resultsContainer" class="results-container"></div>
+        </div>
+        <div class="chart">
+            <canvas id="frequencyChart"></canvas>
+        </div>
+        <div class="word-cloud">
+            <h2>WORD CLOUD</h2>
+            <div id="wordCloudContainer"></div>
+        </div>
+        <!-- Removed the sentiment container -->
+        <!-- Add this section where you want the next word prediction to appear -->
+        <div class="next-word-prediction">
+            <h2>NEXT WORD PREDICTION</h2>
+            <div class="prediction-input">
+                <textarea id="predictionInput" placeholder="Enter text for prediction..."></textarea>
+                <div class="prediction-controls">
+                    <input type="number" id="wordCount" min="1" value="1" placeholder="Number of words">
+                    <button id="predictBtn" onclick="startPrediction()">Predict</button>
+                </div>
+            </div>
+            <div class="prediction-result">
+                <span id="predictionResult"></span>
+            </div>
+        </div>
+    </div>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.23/jspdf.plugin.autotable.min.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
